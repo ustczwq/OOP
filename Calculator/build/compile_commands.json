@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/zwq/Projects/OOP/Calculator/build",
-  "command": "/usr/bin/g++    -g   -o CMakeFiles/calculator.dir/main.cpp.o -c /home/zwq/Projects/OOP/Calculator/main.cpp",
-  "file": "/home/zwq/Projects/OOP/Calculator/main.cpp"
-}
-]

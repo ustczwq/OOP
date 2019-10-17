@@ -1,1 +1,0 @@
-/usr/bin/g++  -g  -rdynamic CMakeFiles/calculator.dir/main.cpp.o  -o calculator 
