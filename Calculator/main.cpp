@@ -1,12 +1,44 @@
 #include <map>
 #include <stack>
+#include <math.h>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <exception>
 
 using namespace std;
 
 enum Attribute { OPERATOR, OPERAND };
+
+
+
+class divideZeroErr:public exception
+{
+public:
+   const char* what()const throw()//#1 
+   {
+        return "ERROR! Don't divide a number by zero.\n";
+   }    
+};
+
+class bracketsErr:public exception
+{
+public:
+   const char* what()const throw()//#1 
+   {
+        return "ERROR! Brackets do not match.\n";
+   }    
+};
+
+class operatorErr:public exception
+{
+public:
+   const char* what()const throw()//#1 
+   {
+        return "ERROR! Invalid operands or operator.\n";
+   }    
+};
+
 
 class Node
 {
@@ -15,10 +47,8 @@ public:
     Attribute attr;
     Node() {};
     Node(double v, Attribute a) : value(v), attr(a) {}
-    bool operator<(const Node&);
+    bool operator<=(const Node&);
 };
-
-
 
 
 class Calculator
@@ -28,9 +58,10 @@ public:
     ~Calculator() {};
 
     bool isOperator(char);
-    int buildSufix(string, stack<Node>&);
+    void buildSufix(string, stack<Node>&);
+    void printStack(stack<Node>);
     double calcSufix(stack<Node>);
-    void printStack(stack<Node>&);
+    void calc2nums(stack<double>&, char);
     
 };
 
@@ -43,16 +74,25 @@ int main(int, char**)
 
     while (true)
     {
-        cout << "Please input expression:" << endl;
+        cout << "\nPlease input expression:" << endl;
         cin >> exp;
-        
-        cout << "\n return " << cal.buildSufix(exp, sufix);
-        cal.printStack(sufix);
-        // cal.printStack(sufix);
 
+        try
+        {
+            cal.buildSufix(exp, sufix);  // build sufix polish
+            cal.printStack(sufix);
+            double res = cal.calcSufix(sufix);
+            cout << "= " << res << endl;
+        }
+        catch(const exception& e)
+        {
+            cerr << e.what() << '\n';
+        }
+
+        while (!sufix.empty()) sufix.pop();
     }
 
-    return 0;
+    return 1;
 }
 
 bool Calculator::isOperator(char a)
@@ -60,80 +100,77 @@ bool Calculator::isOperator(char a)
     return a == '(' || a == ')' || a == '+' || a == '-' || a == '*' || a == '/' || a == '^';
 }
 
-int Calculator::buildSufix(string exp, stack<Node>& sufix)
+void Calculator::buildSufix(string exp, stack<Node>& sufix)
 {
     char ch;
     double num;
     Node node;
-    stack<Node> op;
+    stack<Node> s;  // operator stack
+    stack<Node> polish;
     istringstream iss(exp);
 
-    sufix.push(Node('#', OPERATOR));
+    polish.push(Node('#', OPERATOR));
 
-    for (int i = 0; i < exp.size() ; i = iss.tellg())
+    for (int i = 0; i < iss.str().size() ; i = iss.tellg())
     {
-        if (i == EOF) return EOF;
+        if (i == EOF) throw operatorErr();
 
-        if (isOperator(exp[i]))  // if operator
+        if (isOperator(iss.str()[i]))  // if operator
         {
             iss >> ch;
             node = Node(ch, OPERATOR);
 
-            if (ch == '(')
-                op.push(node);
-            else if (ch == ')')
+            if (ch == '(')  s.push(node);
+            else if (ch == ')')     
             {
-                while (!op.empty() && op.top().value != '(')
+                while (!s.empty() && s.top().value != '(')
                 {
-                    sufix.push(op.top());
-                    op.pop();
+                    polish.push(s.top());
+                    s.pop();
                 }
-                if (op.empty()) return EOF;
-                else op.pop();
+                if (s.empty()) throw bracketsErr();
+                else s.pop();
             }
             else 
             {
-                while (!op.empty() && node < op.top())
+                while (!s.empty() && node <= s.top())
                 {
-                    sufix.push(op.top());
-                    op.pop();
+                    polish.push(s.top());
+                    s.pop();
                 }
-                op.push(node);
+                s.push(node);
             }
         }
-        else
+        else  // operand
         {
             iss >> num;
-            sufix.push(Node(num, OPERAND));
+            polish.push(Node(num, OPERAND));
         }
     }
 
-    while (!op.empty() && op.top().value != '(')
+    while (!s.empty() && s.top().value != '(')
     {
-        sufix.push(op.top());
-        op.pop();
-    }
-
-    if (!op.empty())
-        return EOF;
-    
-    return 1;
-}
-
-void Calculator::printStack(stack<Node>& s)
-{
-    stack<Node> rs;
-
-    while (!s.empty())
-    {
-        rs.push(s.top());
+        polish.push(s.top());
         s.pop();
     }
 
-    cout << endl;
-    while (!rs.empty())
+    if (!s.empty()) throw operatorErr();
+    else  // reverse polisih
     {
-        Node n = rs.top();
+        while(polish.top().value != '#')
+        {
+            sufix.push(polish.top());
+            polish.pop();
+        }
+    }
+}
+
+void Calculator::printStack(stack<Node> s)
+{
+    cout << endl;
+    while (!s.empty())
+    {
+        Node n = s.top();
         if (n.attr == OPERAND)
         {
             cout << ' ' << n.value << " ";
@@ -143,12 +180,77 @@ void Calculator::printStack(stack<Node>& s)
             char c = n.value;
             cout << ' ' << c << " ";
         }
-        rs.pop();
+        s.pop();
     }
     cout << endl;
 }
 
-bool Node::operator<(const Node& n)
+double Calculator::calcSufix(stack<Node> sufix)
+{
+    stack<double> num;
+    while (!sufix.empty()) 
+    {
+        if (sufix.top().attr == OPERAND)
+        {
+            num.push(sufix.top().value);
+            sufix.pop();
+        }
+        else
+        {
+            calc2nums(num, char(sufix.top().value));
+            sufix.pop();
+        }
+    }
+    if (!num.empty())
+    {
+        double res = num.top();
+        num.pop();
+        if (num.empty()) return res;
+        else throw operatorErr();
+    }
+    else throw operatorErr();
+}
+
+void Calculator::calc2nums(stack<double>& num, char c)
+{
+    double n;
+
+    if (num.empty()) throw operatorErr();
+    else
+    {
+        n = num.top();
+        num.pop();
+    }
+    if (num.empty()) throw operatorErr();
+    else
+    {
+        switch (c)
+        {
+        case '+':
+            num.top() += n;
+            break;
+        case '-':
+            num.top() -= n;
+            break;
+        case '*':
+            num.top() *= n;
+            break;
+        case '/':
+            if (n == 0) throw divideZeroErr();
+            else num.top() /= n;
+            break;
+        case '^':
+            num.top() = pow(num.top(), n);
+            break;
+        default:
+            return throw operatorErr();
+        }
+    }
+
+}
+
+
+bool Node::operator<=(const Node& n)
 {
     map<char, short> PRIORITY;
     PRIORITY['('] = 0;
@@ -162,5 +264,5 @@ bool Node::operator<(const Node& n)
     char c1 = this->value;
     char c2 = n.value;
 
-    return PRIORITY[c1] < PRIORITY[c2];
+    return PRIORITY[c1] <= PRIORITY[c2];
 }
