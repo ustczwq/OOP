@@ -154,7 +154,7 @@ void Calculator::buildSufix(string exp, stack<Node>& sufix)
         s.pop();
     }
 
-    if (!s.empty()) throw operatorErr();
+    if (!s.empty()) throw bracketsErr();
     else  // reverse polisih
     {
         while(polish.top().value != '#')
@@ -248,7 +248,6 @@ void Calculator::calc2nums(stack<double>& num, char c)
     }
 
 }
-
 
 bool Node::operator<=(const Node& n)
 {
