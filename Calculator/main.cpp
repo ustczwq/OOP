@@ -80,7 +80,7 @@ int main(int, char**)
         try
         {
             cal.buildSufix(exp, sufix);  // build sufix polish
-            cal.printStack(sufix);
+            // cal.printStack(sufix);
             double res = cal.calcSufix(sufix);
             cout << "= " << res << endl;
         }
