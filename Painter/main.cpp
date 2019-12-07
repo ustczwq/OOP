@@ -28,7 +28,7 @@ private:
     enum Shapes
     {
         circle,
-        square,
+        rect,
         line,
         polygon
     };
@@ -38,30 +38,36 @@ private:
 
     // widgets
     Button quit_button; // end program
+    Button delete_button;
     Menu shape_menu;
 
     void draw_shape(Shapes s);
     void quit();
+    void delete_model();
+    void recover_model();
 
     // callback functions
     static void cb_circle(Address, Address);
-    static void cb_square(Address, Address);
+    static void cb_rect(Address, Address);
     static void cb_line(Address, Address);
     static void cb_menu(Address, Address);
     static void cb_quit(Address, Address);
     static void cb_polygon(Address, Address);
+    static void cb_delete(Address, Address);
 };
 
 Shapes_window::Shapes_window(Point xy, int w, int h, const string &title)
     : Window(xy, w, h, title) ,
       quit_button(Point(x_max() - MENU_W, 0), MENU_W, MENU_H, "Quit", cb_quit),
+      delete_button(Point(x_max() - 3*MENU_W, 0), MENU_W, MENU_H, "DEL", cb_delete),
       shape_menu(Point(0, 0), MENU_W, MENU_H, Menu::horizontal, "shape")
       
 {
     attach(quit_button);
+    attach(delete_button);
  
     shape_menu.attach(new Button(Point(0, 0), 0, 0, "@line  line", cb_line));
-    shape_menu.attach(new Button(Point(0, 0), 0, 0, "@square  rect", cb_square));
+    shape_menu.attach(new Button(Point(0, 0), 0, 0, "@square  rect", cb_rect));
     shape_menu.attach(new Button(Point(0, 0), 0, 0, "@circle  circle", cb_circle));
     shape_menu.attach(new Button(Point(0, 0), 0, 0, "@|>  polygon", cb_polygon));
 
@@ -75,29 +81,33 @@ void Shapes_window::draw_shape(Shapes shape)
     case circle:
     {
         // s.push_back(new Graph_lib::Circle(Point(x, y), 20));
-        add(new Model_lib::Circle(0, MENU_H, WIN_W, WIN_H - MENU_H));
+        Model_lib::Circle* circle = new Model_lib::Circle(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(circle);
+        add(circle);
         break;
     }
-    case square:
+    case rect:
     {
-        // sm.push_back(new Rect(x - 30, y - 20, x + 20, y + 20));
-        add(new Model_lib::Rect(0, MENU_H, WIN_W, WIN_H - MENU_H));
-    
-        // s.push_back(new Rect(x - 30, y - 20, x + 20, y + 20));
+        Model_lib::Rect* rect = new Model_lib::Rect(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(rect);
+        add(rect);
         break;
     }
     case line:
     {
-        add(new Model_lib::Line(0, MENU_H, WIN_W, WIN_H - MENU_H));
-        // s.push_back(new Graph_lib::Line(Point(x - 20, y), Point(x + 20, y)));
+        Model_lib::Line* line = new Model_lib::Line(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(line);
+        add(line);
         break;
     }
     case polygon:
     {
-        add(new Model_lib::Polygon(0, MENU_H, WIN_W, WIN_H - MENU_H));
-        // s.push_back(new Graph_lib::Line(Point(x - 20, y), Point(x + 20, y)));
+        Model_lib::Polygon* polygon = new Model_lib::Polygon(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(polygon);
+        add(polygon);
         break;
     }
+    default: break;
     }
 
     // update current position readout
@@ -113,14 +123,29 @@ void Shapes_window::quit()
     hide();
 }
 
+void Shapes_window::delete_model()
+{
+    for (int i = 0; i < sm.size(); i++)
+    {
+        if (sm[i].focused())
+            remove(sm[i]);
+    }
+    redraw();
+}
+
+void Shapes_window::cb_delete(Address, Address pw)
+{
+    reference_to<Shapes_window>(pw).delete_model();
+}
+
 void Shapes_window::cb_circle(Address, Address pw)
 {
     reference_to<Shapes_window>(pw).draw_shape(circle);
 }
 
-void Shapes_window::cb_square(Address, Address pw)
+void Shapes_window::cb_rect(Address, Address pw)
 {
-    reference_to<Shapes_window>(pw).draw_shape(square);
+    reference_to<Shapes_window>(pw).draw_shape(rect);
 }
 
 void Shapes_window::cb_line(Address, Address pw)
@@ -142,7 +167,7 @@ int main()
 {
     try
     {
-        Shapes_window win(Point(100, 100), 	WIN_W, WIN_H, "lines");
+        Shapes_window win(Point(100, 100), 	WIN_W, WIN_H, "Naive FLTK Painter");
 		
         return gui_main();
     }
