@@ -4,7 +4,7 @@
 
 int main()
 {
-	using namespace Graph_lib;	// use our graphics interface library
+	using namespace Graph_lib;	
 
 	try {
 		Lines_window win(Point(100, 100), 600, 400, "Lines");
