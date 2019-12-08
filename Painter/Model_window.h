@@ -8,7 +8,7 @@
 namespace Model_window
 {
 
-class FL_EXPORT Menubar : public Fl_Menu_Bar
+class Menubar : public Fl_Menu_Bar
 {
 protected:
     Fl_Callback *cb_open;
@@ -33,11 +33,12 @@ public:
             {0},
             {"&Style", 0, 0, 0, FL_SUBMENU},
             {"&Color", 0, 0, 0, FL_SUBMENU},
-            {"Green", FL_CTRL + 'g', cb_trans, (void *)FL_GREEN},
-            {"Yellow", FL_CTRL + 'y', cb_trans, (void *)FL_YELLOW},
-            {"Blue", FL_CTRL + 'b', cb_trans, (void *)FL_BLUE},
+            {"RED", FL_CTRL + 'r', cb_trans, (void *)FL_DARK_RED},
+            {"Green", FL_CTRL + 'g', cb_trans, (void *)FL_DARK_GREEN},
+            {"Yellow", FL_CTRL + 'y', cb_trans, (void *)FL_DARK_YELLOW},
+            {"Blue", FL_CTRL + 'b', cb_trans, (void *)FL_DARK_BLUE},
             {"Black", FL_CTRL + 'k', cb_trans, (void *)FL_BLACK},
-            {"Cyan", FL_CTRL + 'k', cb_trans, (void *)FL_CYAN},
+            {"Cyan", FL_CTRL + 'k', cb_trans, (void *)FL_DARK_CYAN},
             {0},
             {"&Line", 0, 0, 0, FL_SUBMENU},
             {"....", FL_SHIFT + 'd', cb_trans, (void *)FL_DOT},

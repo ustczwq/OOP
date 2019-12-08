@@ -66,14 +66,14 @@ private:
     static void cb_recover(Address, Address);
 
     // menubar callback
-    static void menu_open(Fl_Widget* o, void* v);
-    static void menu_save(Fl_Widget* o, void* v);
-    static void menu_quit(Fl_Widget* o, void* v);
-    static void menu_trans(Fl_Widget* o, void* v);
-    static void cb_menu_open(Address, Address);
-    static void cb_menu_save(Address, Address);
-    static void cb_menu_quit(Address, Address);
-    static void cb_menu_trans(Address, Address);
+    void menu_open(Fl_Widget* o, void* v);
+    void menu_save(Fl_Widget* o, void* v);
+    void menu_quit(Fl_Widget* o, void* v);
+    void menu_trans(Fl_Widget* o, void* v);
+    static void cb_menu_open(Fl_Widget*, void*);
+    static void cb_menu_save(Fl_Widget*, void*);
+    static void cb_menu_quit(Fl_Widget*, void*);
+    static void cb_menu_trans(Fl_Widget*, void*);
 
 };
 
@@ -83,7 +83,7 @@ Shapes_window::Shapes_window(Point xy, int w, int h, const string &title)
       delete_button(Point(x_max() - 3 * MENU_W - 40, 0), MENU_W, MENU_H, "X  Delete", cb_delete),
       recover_button(Point(x_max() - 2 * MENU_W - 40, 0), MENU_W, MENU_H, "@-2undo  Undo", cb_recover),
       shape_menu(Point(x_max() - 7 * MENU_W - 80, 0), MENU_W, MENU_H, Menu::horizontal, "shape"),
-      menu(new Model_window::Menubar(0, 0, 150, MENU_H, menu_quit, menu_quit, menu_quit, menu_quit))
+      menu(new Model_window::Menubar(0, 0, 150, MENU_H, cb_menu_open, cb_menu_save, cb_menu_trans, cb_menu_quit))
 {
     attach(quit_button);
     attach(delete_button);
@@ -106,30 +106,30 @@ void Shapes_window::draw_shape(Shapes shape)
     case circle:
     {
         // s.push_back(new Graph_lib::Circle(Point(x, y), 20));
-        Model_lib::Circle *circle = new Model_lib::Circle(0, MENU_H, WIN_W, WIN_H - MENU_H);
-        sm.push_back(circle);
-        add(circle);
+        Model_lib::Circle *c = new Model_lib::Circle(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(c);
+        add(c);
         break;
     }
     case rect:
     {
-        Model_lib::Rect *rect = new Model_lib::Rect(0, MENU_H, WIN_W, WIN_H - MENU_H);
-        sm.push_back(rect);
-        add(rect);
+        Model_lib::Rect *r = new Model_lib::Rect(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(r);
+        add(r);
         break;
     }
     case line:
     {
-        Model_lib::Line *line = new Model_lib::Line(0, MENU_H, WIN_W, WIN_H - MENU_H);
-        sm.push_back(line);
-        add(line);
+        Model_lib::Line *l = new Model_lib::Line(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(l);
+        add(l);
         break;
     }
     case polygon:
     {
-        Model_lib::Polygon *polygon = new Model_lib::Polygon(0, MENU_H, WIN_W, WIN_H - MENU_H);
-        sm.push_back(polygon);
-        add(polygon);
+        Model_lib::Polygon *p = new Model_lib::Polygon(0, MENU_H, WIN_W, WIN_H - MENU_H);
+        sm.push_back(p);
+        add(p);
         break;
     }
     default:
@@ -183,19 +183,13 @@ void Shapes_window::recover_model()
 
 void Shapes_window::menu_quit(Fl_Widget* o, void* v)
 {
-    // hide();
-    int *a = (int*) v;
-    std::cout << "fuck class" << std::endl;
-    printf("%d\n", a);
-
+    hide();
 }
 
 void Shapes_window::menu_open(Fl_Widget* o, void* v)
 {
-    // hide();
-    std::cout << "fuck class" << std::endl;
-    std::cout << v << std::endl;
-
+    char *filename = fl_file_chooser("./", ".cpp", "main.cpp");
+    std::cout << filename << std::endl;
 }
 
 void Shapes_window::menu_save(Fl_Widget* o, void* v)
@@ -208,10 +202,23 @@ void Shapes_window::menu_save(Fl_Widget* o, void* v)
 
 void Shapes_window::menu_trans(Fl_Widget* o, void* v)
 {
-    // hide();
-    std::cout << "fuck class" << std::endl;
-    std::cout << v << std::endl;
-
+    char ss[10];
+    sprintf(ss, "%d", (int*)v);
+    int userdata = std::stoi(ss);
+    if ( userdata > FL_DASHDOTDOT) // set line color
+    {
+        for (int i = sm.size() - 1; i >= 0; i--)
+            if (sm[i]->focused())
+                sm[i]->set_line_color(userdata);
+    
+    }
+    else
+    {
+        for (int i = sm.size() - 1; i >= 0; i--)
+            if (sm[i]->focused())
+                sm[i]->set_line_style(userdata);
+    }
+    redraw();
 }
 
 void Shapes_window::cb_delete(Address, Address pw)
@@ -249,24 +256,24 @@ void Shapes_window::cb_polygon(Address, Address pw)
     reference_to<Shapes_window>(pw).draw_shape(polygon);
 }
 
-void Shapes_window::cb_menu_open(Address, Address pw)
+void Shapes_window::cb_menu_open(Fl_Widget* o, void* v)
 {
-    reference_to<Shapes_window>(pw).menu_open(0, 0);
+    reference_to<Shapes_window>(o->parent()).menu_open(o, v);
 }
 
-void Shapes_window::cb_menu_save(Address, Address pw)
+void Shapes_window::cb_menu_save(Fl_Widget* o, void* v)
 {
-    reference_to<Shapes_window>(pw).menu_save(0, 0);
+    reference_to<Shapes_window>(o->parent()).menu_save(o, v);
 }
 
-void Shapes_window::cb_menu_quit(Address, Address pw)
+void Shapes_window::cb_menu_quit(Fl_Widget* o, void* v)
 {
-    reference_to<Shapes_window>(pw).menu_quit(0, 0);
+    reference_to<Shapes_window>(o->parent()).menu_quit(o, v);
 }
 
-void Shapes_window::cb_menu_trans(Address, Address pw)
+void Shapes_window::cb_menu_trans(Fl_Widget* o, void* v)
 {
-    reference_to<Shapes_window>(pw).menu_trans(0, 0);
+    reference_to<Shapes_window>(o->parent()).menu_trans(o, v);
 }
 
 int main()

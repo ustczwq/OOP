@@ -11,16 +11,12 @@ Model::Model(int X, int Y, int W, int H, const char *l)
     can_draw = false;
     points_limit = 10;
     is_focused = false;
+    line_color = FL_BLACK;
 }
 
 void Model::draw_shapes()
 {
     if (!can_draw || !points.size()) return;
-
-    if (is_focused) 
-        fl_color(FL_RED);
-    else
-        fl_color(FL_BLACK);
 
     if (1 < points.size())
     {
@@ -34,9 +30,9 @@ void Model::draw_shapes()
             resize_by_points();
         }
     }
-    else
+    else if (!is_created)
     {
-        fl_rectf(points[0].x, points[0].y, 2, 2);
+        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
     }
 
 }
@@ -67,7 +63,21 @@ void Model::draw()
 {
     draw_box();
     draw_label();
+    set_all_style();
     draw_shapes();
+}
+
+void Model::set_all_style()
+{
+    fl_color(line_color); 
+    
+    if (is_focused)
+    {
+        for (int i = 0; i < points.size(); i++)
+        {
+            fl_rectf(points[i].x - 3, points[i].y - 3, 6, 6);
+        }
+    }
 }
 
 int Model::handle(int event)
@@ -114,6 +124,7 @@ int Model::handle(int event)
             dx = X - x();
             dy = Y - y();
             is_focused = !is_focused;
+            
             parent()->redraw();
             return 1;
         }
@@ -195,11 +206,6 @@ void Rect::draw_shapes()
 {
     if (!can_draw || !points.size()) return;
 
-    if (is_focused) 
-        fl_color(FL_RED);
-    else
-        fl_color(FL_BLACK);
-
     if (1 < points.size())
     {
         int x1 = points[0].x;
@@ -216,9 +222,9 @@ void Rect::draw_shapes()
         // resize_by_points();
         resize(x, y, w, h);
     }
-    else
+    else if (!is_created)
     {
-        fl_rectf(points[0].x, points[0].y, 2, 2);
+        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
     }
 }
 
@@ -230,11 +236,6 @@ Circle::Circle(int x, int y, int w, int h) :  Model(x, y, w, h)
 void Circle::draw_shapes()
 {
     if (!can_draw || !points.size()) return;
-
-    if (is_focused) 
-        fl_color(FL_RED);
-    else
-        fl_color(FL_BLACK);
 
     if (1 < points.size())
     {
@@ -248,14 +249,12 @@ void Circle::draw_shapes()
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
         fl_arc(x, y, w, h, 0, 360);
-        fl_rectf(x1, y1, 2, 2);
-        fl_rectf(x2, y2, 2, 2);
-        // resize_by_points();
+        
         resize(x, y, w, h);
     }
-    else
+    else if (!is_created)
     {
-        fl_rectf(points[0].x, points[0].y, 2, 2);
+        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
     }
 
 }
@@ -268,11 +267,6 @@ Line::Line(int x, int y, int w, int h) :  Model(x, y, w, h)
 void Line::draw_shapes()
 {
     if (!can_draw || !points.size()) return;
-
-    if (is_focused) 
-        fl_color(FL_RED);
-    else
-        fl_color(FL_BLACK);
 
     if (1 < points.size())
     {
@@ -290,9 +284,9 @@ void Line::draw_shapes()
         
         resize(x, y, w, h);
     }
-    else
+    else if (!is_created)
     {
-        fl_rectf(points[0].x, points[0].y, 2, 2);
+        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
     }
 }
 

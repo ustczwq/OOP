@@ -23,7 +23,10 @@ public:
     void draw();
     bool can_resize(int, int);
     void update_points(int, int);
-    bool focused() {return is_focused;}
+    bool focused() {return this->is_focused;}
+    void set_line_color(int color) {this->line_color = color;}
+    void set_line_style(int style) {this->line_style = style;}
+    void set_all_style();
 
 protected:
 	bool is_created;
@@ -32,6 +35,8 @@ protected:
     int drag_idx;
     int points_limit;
     bool is_focused;
+    int line_color;
+    int line_style;
 
     virtual void draw_shapes();
 
