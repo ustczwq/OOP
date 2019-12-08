@@ -69,7 +69,8 @@ void Model::draw()
 
 void Model::set_all_style()
 {
-    fl_color(line_color); 
+    fl_color(line_color);
+    fl_line_style(line_style);
     
     if (is_focused)
     {
