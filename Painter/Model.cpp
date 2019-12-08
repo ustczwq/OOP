@@ -110,7 +110,7 @@ int Model::handle(int event)
         {       
         case FL_PUSH:   // get distance between cursor and model 
         {
-            std::cout << "push " << event << std::endl;
+            // std::cout << "push " << event << std::endl;
             dx = X - x();
             dy = Y - y();
             is_focused = !is_focused;
@@ -119,7 +119,7 @@ int Model::handle(int event)
         }
         case FL_DRAG:
         {
-            std::cout << "drag " << event << std::endl;
+            // std::cout << "drag " << event << std::endl;
 
             drag_idx = -1;
             drag_resize = can_resize(X, Y);
