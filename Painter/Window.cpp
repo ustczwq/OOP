@@ -11,7 +11,8 @@
 
 //------------------------------------------------------------------------------
 
-namespace Graph_lib {
+namespace Graph_lib 
+{
 
 Window::Window(int ww, int hh, const string& title)
     :Fl_Window(ww,hh,title.c_str()),w(ww),h(hh)

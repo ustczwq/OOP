@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package mw;
+
+
+message Point
+{
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message Points
+{
+    repeated Point points = 1;
+}
+
+message Model
+{
+    int32 x = 1;
+    int32 y = 2;
+    int32 w = 3;
+    int32 h = 4;
+    Points points = 5;
+    int32 points_limit = 6;
+    bool is_created = 7;
+    bool can_draw = 8;
+    bool drag_resize = 9;
+    int32 drag_idx = 10;
+    int32 line_color = 11;
+    int32 line_style = 12;
+    bool is_focused = 13;
+    int32 shape_id = 14;
+
+}
+
+message Models
+{
+    repeated Model models = 1;
+}
+
+message Num
+{
+    int32 num = 1;
+}
+
+message Window
+{
+    enum Shapes
+    {
+        line = 0;
+        rect = 1;
+        circle = 2;
+        polygon = 3;
+    }
+
+    Models sm = 1;
+    Models rm = 2;
+    repeated Num nums = 3;
+
+}

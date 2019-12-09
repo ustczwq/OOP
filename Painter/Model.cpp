@@ -3,8 +3,8 @@
 
 namespace Model_lib
 {
-    
-Model::Model(int X, int Y, int W, int H, const char *l)
+
+Model::Model(int X, int Y, int W, int H, const char *l, const int id)
     : Fl_Widget(X, Y, W, H, l)
 {
     is_created = false;
@@ -12,29 +12,33 @@ Model::Model(int X, int Y, int W, int H, const char *l)
     points_limit = 10;
     is_focused = false;
     line_color = FL_BLACK;
+    line_style = FL_SOLID;
+    drag_resize = false;
+    drag_idx = 0;
+    this->shape_id = id;
 }
 
 void Model::draw_shapes()
 {
-    if (!can_draw || !points.size()) return;
+    if (!can_draw || !points.size())
+        return;
 
     if (1 < points.size())
     {
         int i = 1;
         for (i; i < points.size(); ++i)
-            fl_line(points[i-1].x, points[i-1].y, points[i].x, points[i].y);
-        
+            fl_line(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
+
         if (is_created)
         {
-            fl_line(points[i-1].x, points[i-1].y, points[0].x, points[0].y);
+            fl_line(points[i - 1].x, points[i - 1].y, points[0].x, points[0].y);
             resize_by_points();
         }
     }
     else if (!is_created)
     {
-        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
+        fl_rectf(points[0].x - 2, points[0].y - 2, 4, 4);
     }
-
 }
 
 void Model::resize_by_points()
@@ -50,10 +54,14 @@ void Model::resize_by_points()
         {
             int x = points[i].x;
             int y = points[i].y;
-            if (x < x_min) x_min = x;
-            if (x > x_max) x_max = x;
-            if (y < y_min) y_min = y;
-            if (y > y_max) y_max = y;
+            if (x < x_min)
+                x_min = x;
+            if (x > x_max)
+                x_max = x;
+            if (y < y_min)
+                y_min = y;
+            if (y > y_max)
+                y_max = y;
         }
         resize(x_min, y_min, x_max - x_min, y_max - y_min);
     }
@@ -71,7 +79,7 @@ void Model::set_all_style()
 {
     fl_color(line_color);
     fl_line_style(line_style);
-    
+
     if (is_focused)
     {
         for (int i = 0; i < points.size(); i++)
@@ -86,7 +94,7 @@ int Model::handle(int event)
     int X = Fl::event_x();
     int Y = Fl::event_y();
 
-    if (!is_created)    // creating
+    if (!is_created) // creating
     {
         int button = Fl::event_button();
         if ((can_draw && button == FL_RIGHT_MOUSE) || points.size() >= points_limit)
@@ -94,38 +102,39 @@ int Model::handle(int event)
             is_created = true;
             parent()->redraw();
             return 0;
-        }   // created by right click or limit
+        } // created by right click or limit
         switch (event)
         {
-        case FL_PUSH:   // add a point at event position
+        case FL_PUSH: // add a point at event position
         {
             can_draw = true;
-            points.push_back(Point(X, Y));  
+            points.push_back(Point(X, Y));
             parent()->redraw();
             return 1;
         }
-        case FL_DRAG:   // drag to change a point created
+        case FL_DRAG: // drag to change a point created
         {
             points[points.size() - 1].x = X;
             points[points.size() - 1].y = Y;
             parent()->redraw();
             return 1;
         }
-        default: return 1;
+        default:
+            return 1;
         }
     }
-    else  // after created
+    else // after created
     {
         static int dx, dy;
         switch (event)
-        {       
-        case FL_PUSH:   // get distance between cursor and model 
+        {
+        case FL_PUSH: // get distance between cursor and model
         {
             // std::cout << "push " << event << std::endl;
             dx = X - x();
             dy = Y - y();
             is_focused = !is_focused;
-            
+
             parent()->redraw();
             return 1;
         }
@@ -135,8 +144,8 @@ int Model::handle(int event)
 
             drag_idx = -1;
             drag_resize = can_resize(X, Y);
-           
-            if (drag_resize)    // drag to resize
+
+            if (drag_resize) // drag to resize
             {
                 // std::cout << drag_resize << " drag to resize " << drag_idx << std::endl;
                 window()->cursor(FL_CURSOR_CROSS);
@@ -144,7 +153,7 @@ int Model::handle(int event)
                 points[drag_idx].y = Y;
                 parent()->redraw();
             }
-            else    // just move
+            else // just move
             {
                 window()->cursor(FL_CURSOR_MOVE);
                 update_points(X - dx - x(), Y - dy - y());
@@ -169,7 +178,7 @@ int Model::handle(int event)
         }
         }
     }
-    
+
     return 1;
 }
 
@@ -180,7 +189,6 @@ void Model::update_points(int dx, int dy)
         points[i].x += dx;
         points[i].y += dy;
     }
-    
 }
 
 bool Model::can_resize(int event_x, int event_y)
@@ -198,14 +206,15 @@ bool Model::can_resize(int event_x, int event_y)
     return false;
 }
 
-Rect::Rect(int x, int y, int w, int h) :  Model(x, y, w, h) 
+Rect::Rect(int x, int y, int w, int h, const char* l, const int id) : Model(x, y, w, h, l, id)
 {
     points_limit = 2;
 }
 
 void Rect::draw_shapes()
 {
-    if (!can_draw || !points.size()) return;
+    if (!can_draw || !points.size())
+        return;
 
     if (1 < points.size())
     {
@@ -220,23 +229,23 @@ void Rect::draw_shapes()
         int h = std::abs(y2 - y1);
 
         fl_rect(x, y, w, h);
-        // resize_by_points();
         resize(x, y, w, h);
     }
     else if (!is_created)
     {
-        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
+        fl_rectf(points[0].x - 2, points[0].y - 2, 4, 4);
     }
 }
 
-Circle::Circle(int x, int y, int w, int h) :  Model(x, y, w, h) 
+Circle::Circle(int x, int y, int w, int h, const char* l, const int id) : Model(x, y, w, h, l, id)
 {
     points_limit = 2;
 }
 
 void Circle::draw_shapes()
 {
-    if (!can_draw || !points.size()) return;
+    if (!can_draw || !points.size())
+        return;
 
     if (1 < points.size())
     {
@@ -250,24 +259,24 @@ void Circle::draw_shapes()
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
         fl_arc(x, y, w, h, 0, 360);
-        
+
         resize(x, y, w, h);
     }
     else if (!is_created)
     {
-        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
+        fl_rectf(points[0].x - 2, points[0].y - 2, 4, 4);
     }
-
 }
 
-Line::Line(int x, int y, int w, int h) :  Model(x, y, w, h) 
+Line::Line(int x, int y, int w, int h, const char* l, const int id) : Model(x, y, w, h, l, id)
 {
     points_limit = 2;
 }
 
 void Line::draw_shapes()
 {
-    if (!can_draw || !points.size()) return;
+    if (!can_draw || !points.size())
+        return;
 
     if (1 < points.size())
     {
@@ -282,12 +291,12 @@ void Line::draw_shapes()
         int y = y1 < y2 ? y1 : y2;
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
-        
+
         resize(x, y, w, h);
     }
     else if (!is_created)
     {
-        fl_rectf(points[0].x - 2, points[0].y - 2 , 4, 4);
+        fl_rectf(points[0].x - 2, points[0].y - 2, 4, 4);
     }
 }
 

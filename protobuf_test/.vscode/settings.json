@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.configurationProvider": "go2sh.cmake-integration",
+    "files.associations": {
+        "fstream": "cpp",
+        "iosfwd": "cpp"
+    }
+}
