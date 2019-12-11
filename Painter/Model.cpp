@@ -31,8 +31,8 @@ void Model::draw_shapes()
 
         if (is_created)
         {
-            fl_line(points[i - 1].x, points[i - 1].y, points[0].x, points[0].y);
             resize_by_points();
+            fl_line(points[i - 1].x, points[i - 1].y, points[0].x, points[0].y);
         }
     }
     else if (!is_created)
@@ -130,24 +130,19 @@ int Model::handle(int event)
         {
         case FL_PUSH: // get distance between cursor and model
         {
-            // std::cout << "push " << event << std::endl;
             dx = X - x();
             dy = Y - y();
             is_focused = !is_focused;
-
             parent()->redraw();
             return 1;
         }
         case FL_DRAG:
         {
-            // std::cout << "drag " << event << std::endl;
-
             drag_idx = -1;
             drag_resize = can_resize(X, Y);
 
             if (drag_resize) // drag to resize
             {
-                // std::cout << drag_resize << " drag to resize " << drag_idx << std::endl;
                 window()->cursor(FL_CURSOR_CROSS);
                 points[drag_idx].x = X;
                 points[drag_idx].y = Y;
@@ -228,8 +223,8 @@ void Rect::draw_shapes()
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
 
-        fl_rect(x, y, w, h);
         resize(x, y, w, h);
+        fl_rect(x, y, w, h);  
     }
     else if (!is_created)
     {
@@ -258,9 +253,10 @@ void Circle::draw_shapes()
         int y = y1 < y2 ? y1 : y2;
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
-        fl_arc(x, y, w, h, 0, 360);
 
         resize(x, y, w, h);
+        fl_arc(x, y, w, h, 0, 360);
+        
     }
     else if (!is_created)
     {
@@ -285,14 +281,13 @@ void Line::draw_shapes()
         int x2 = points[1].x;
         int y2 = points[1].y;
 
-        fl_line(x1, y1, x2, y2);
-
         int x = x1 < x2 ? x1 : x2;
         int y = y1 < y2 ? y1 : y2;
         int w = std::abs(x2 - x1);
         int h = std::abs(y2 - y1);
 
         resize(x, y, w, h);
+        fl_line(x1, y1, x2, y2);
     }
     else if (!is_created)
     {
